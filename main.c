@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <raylib.h>
 
+const int tilesize = 64;
+const int screenWidth = tilesize * 18;
+const int screenHeight = tilesize * 10;
+
 int main() {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
 
     InitWindow(screenWidth, screenHeight, "raylib [text] example - font filters");
 
-    const char msg[50] = "@";
+    const char msg[1] = "@";
 
     // NOTE: Textures/Fonts MUST be loaded after Window initialization (OpenGL context is required)
 
