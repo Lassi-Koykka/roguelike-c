@@ -55,6 +55,7 @@ int main() {
 
     tilesize = (float)font.baseSize;
     Vector2 playerPos = { 4, 4 };
+    double lastMoveTime = GetTime();
 
     // Setup texture scaling filter
     SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
@@ -65,16 +66,22 @@ int main() {
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+        // float deltaTime = GetFrameTime();
         // Update
         //----------------------------------------------------------------------------------
         tilesize += GetMouseWheelMove()*4.0f;
 
         Vector2 textSize = MeasureTextEx(font, playerChar, tilesize, 0);
-
-        if (IsKeyDown(KEY_LEFT)) playerPos.x -= 1;
-        else if (IsKeyDown(KEY_RIGHT)) playerPos.x += 1;
-        else if (IsKeyDown(KEY_UP)) playerPos.y -= 1;
-        else if (IsKeyDown(KEY_DOWN)) playerPos.y += 1;
+        double time = GetTime();
+        if(time - lastMoveTime > 0.15) {
+            Vector2 prevPost = (Vector2){playerPos.x, playerPos.y};
+            if (IsKeyDown(KEY_LEFT)) playerPos.x -= 1;
+            else if (IsKeyDown(KEY_RIGHT)) playerPos.x += 1;
+            else if (IsKeyDown(KEY_UP)) playerPos.y -= 1;
+            else if (IsKeyDown(KEY_DOWN)) playerPos.y += 1;
+            if(prevPost.x != playerPos.x || prevPost.y != playerPos.y)
+                lastMoveTime = time;
+        }
 
         //----------------------------------------------------------------------------------
 
