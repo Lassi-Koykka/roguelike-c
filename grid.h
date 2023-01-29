@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <raylib.h>
 #include <stdio.h>
 
 typedef struct {
@@ -7,11 +8,14 @@ typedef struct {
     char **data;
 } Grid;
 
-Grid* new_grid(int cols, int rows);
+Grid* NewGrid(int cols, int rows);
 
-void print_grid(FILE *f, Grid* g, int spacing);
+void PrintGrid(FILE *f, Grid* g, int spacing);
 
-void free_grid(Grid *grid);
+Vector2 GridFind(Grid *g, char c);
 
+void FreeGrid(Grid *grid);
 
-Grid* read_grid_from_file(char *filepath);
+Grid* ReadGridFromFile(char *filepath);
+
+Vector2 GridPosToAbs(Vector2 pos, float tilesize);
