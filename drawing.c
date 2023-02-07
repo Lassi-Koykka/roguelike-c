@@ -49,6 +49,13 @@ void SetTileSize(int val) {
     tilesize = val;
 } 
 
+void DrawShadow(Vector2 pos) {
+    Vector2 absPos = GridPosToAbs(pos, tilesize);
+    Rectangle rec = {absPos.x, absPos.y, tilesize, tilesize};
+    DrawRectangleRec(rec, (Color){0,0,0,150});
+    DrawRectangleLinesEx(rec, 0.5, DARKGRAY);
+}
+
 void DrawAscii(char* symbol, Vector2 pos, Color fg, Color bg, int bold) {
     Font font = bold ? boldFont : defaultFont;
     Vector2 absPos = GridPosToAbs(pos, tilesize);
@@ -66,14 +73,19 @@ void DrawTile (char* symbol, Vector2 pos) {
     DrawAscii(symbol, pos, colors.fg, colors.bg, 1);
 }
 
-void DrawMap(Grid *g) {
+void DrawMap(Grid *g, Grid *sightmask) {
     for(int row = 0; row < g->h; row++) {
         for(int col = 0; col < g->w; col++) {
+            if(!sightmask->data[row][col])
+                continue;
             char c = g->data[row][col];
             if(IsBlankTile(c)) continue;
             char symbol[2] = {c};
             Vector2 pos = {col, row};
             DrawTile(symbol, pos);
+            if(sightmask->data[row][col] == 1) {
+                DrawShadow(pos);
+            }
         }
     }
 }

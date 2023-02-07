@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <raylib.h>
 #include <stdlib.h>
@@ -7,6 +8,13 @@
 #include "config.h"
 #include "camera.h"
 #include "drawing.h"
+
+#define MAX_TILESIZE 128
+
+
+#define UNKNOWN 0
+#define NOT_VISIBLE 1
+#define VISIBLE 2
 
 void LoadAssets() {
     LoadFonts();
@@ -20,11 +28,25 @@ int IsWall(Grid* g, Vector2 pos) {
     return c == '#' || c == '^';
 }
 
+void Fov(Grid* g, Grid *mask, Vector2 pos) {
+    for(int row = 0; row < g->h; row++) {
+        for(int col = 0; col < g->w; col++) {
+            if(abs((int)pos.x - col) > 1 || abs((int)pos.y - row) > 1) {
+                if(mask->data[row][col] == 2)
+                  mask->data[row][col] = 1;
+                continue;
+            }
+            mask->data[row][col] = 2;
+        }
+    }
+}
+
 int main1() {
     Grid *map = ReadGridFromFile("map.txt");
     PrintGrid(stdout, map, 1);
     return 0;
 }
+
 
 int main() {
 
@@ -33,6 +55,7 @@ int main() {
 
     extern int tilesize;
     Grid* map = ReadGridFromFile("map2.txt");
+    Grid* sightmask = NewGrid(map->w, map->h);
     char playerChar[2] = "@";
     Vector2 playerPos = {4, 4};
     // Vector2 playerPos = GridFind(map, '@');
@@ -59,7 +82,10 @@ int main() {
         //----------------------------------------------------------------------------------
 
         // float deltaTime = GetFrameTime();
-        tilesize += GetMouseWheelMove()*4.0f;
+        float scrollDelta = GetMouseWheelMove()*4.0f;
+        float newSize = tilesize + scrollDelta;
+        if(newSize > 0 && newSize < MAX_TILESIZE)
+            tilesize = newSize;
 
         double time = GetTime();
         Vector2 prevPos = (Vector2){playerPos.x, playerPos.y};
@@ -84,6 +110,9 @@ int main() {
         camPos.y += tilesize / 2.0f;
         UpdateCameraCenter(&camera, camPos, screenWidth, screenHeight);
 
+        //LOS
+        Fov(map, sightmask, playerPos);
+
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -92,14 +121,12 @@ int main() {
 
             ClearBackground(BLACK);
 
-            DrawText("Use mouse wheel to change font size", 20, 20, 10, GRAY);
             BeginMode2D(camera);
-                DrawMap(map);
+                DrawMap(map, sightmask);
                 DrawAscii(playerChar, playerPos, GOLD, curTileColor.bg, 1);
             EndMode2D();
-
-            DrawText(TextFormat("Tilesize size: %02.02f", tilesize), 20, screenHeight - 50, 10, WHITE);
-
+            DrawText("Use mouse wheel to zoom", 20, 20, 10, GRAY);
+            DrawText(TextFormat("Tilesize size: %d", tilesize), 20, screenHeight - 50, 10, WHITE);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
